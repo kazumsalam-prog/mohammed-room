@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>منصة الصف</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#f3f6f2;--card:#fff;--ink:#1c2b27;--mute:#5f726c;--line:#dbe4df;--board:#1f3d36;--chalk:#f4f7f2;--amber:#e9a721;--amber-ink:#2b1d00;--pri:#1f6f5c;--pri-ink:#fff;--danger:#b3372f;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101b18;--card:#172622;--ink:#e8f0ec;--mute:#9bb1a9;--line:#2a3d37;--board:#0c1f1a;--pri:#3fae93;--pri-ink:#06211a;--danger:#ee7b72;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101b18;--card:#172622;--ink:#e8f0ec;--mute:#9bb1a9;--line:#2a3d37;--board:#0c1f1a;--pri:#3fae93;--pri-ink:#06211a;--danger:#ee7b72;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',Tahoma,'Segoe UI',sans-serif;line-height:1.7;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.btn{border:0;border-radius:10px;padding:.55rem 1.1rem;background:var(--pri);color:var(--pri-ink);font-weight:600;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.amber{background:var(--amber);color:var(--amber-ink)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--line)}
+.btn.sm{padding:.25rem .7rem;font-size:.9rem}
+input,select{width:100%;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+label{display:block;font-size:.9rem;color:var(--mute);margin:.7rem 0 .2rem}
+.login{display:grid;grid-template-columns:1.1fr 1fr;min-height:100vh}
+.board{background:var(--board);color:var(--chalk);padding:3rem;display:flex;flex-direction:column;justify-content:center;gap:1rem}
+.board h1{font-size:clamp(2rem,5vw,3.6rem);line-height:1.25;margin:0;font-weight:800}
+.board p{max-width:30ch;opacity:.85;margin:0}
+.board .tray{height:6px;width:140px;background:var(--amber);border-radius:3px}
+.formside{display:flex;align-items:center;justify-content:center;padding:2rem}
+.box{width:100%;max-width:380px}
+.tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.tab{padding:.4rem 1rem;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.2rem;background:var(--board);color:var(--chalk);flex-wrap:wrap}
+.top b{font-size:1.2rem}.top .btn.alt{color:var(--chalk);border-color:#ffffff40}
+main{max-width:980px;margin:0 auto;padding:1.2rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem;margin-bottom:.8rem}
+.row{display:flex;gap:.6rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;align-items:end;margin-bottom:1rem}
+.code{font-family:ui-monospace,Consolas,monospace;letter-spacing:.12em;background:var(--bg);padding:.1rem .6rem;border-radius:6px;border:1px dashed var(--line)}
+.live{display:inline-block;background:var(--danger);color:#fff;border-radius:999px;padding:0 .6rem;font-size:.8rem}
+.mute{color:var(--mute)}.empty{padding:2rem;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:14px}
+.room{display:grid;grid-template-columns:1fr 320px;gap:.8rem;padding:.8rem;height:calc(100vh - 62px)}
+.stage{background:#000;border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center}
+.stage video{width:100%;height:100%;object-fit:contain}
+.stage .msg{padding:2rem;max-width:34ch}
+.ctrl{position:absolute;bottom:12px;left:0;right:0;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}
+.side{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:0}
+.chat{flex:1;overflow:auto;padding:.8rem;min-height:0}
+.chat div{margin-bottom:.5rem}.chat b{color:var(--pri)}
+.send{display:flex;gap:.4rem;padding:.6rem;border-top:1px solid var(--line)}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.5rem 1.2rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+#toast.on{opacity:1}
+@media(max-width:760px){.login{grid-template-columns:1fr}.board{padding:2rem 1.5rem}.room{grid-template-columns:1fr;height:auto}.stage{height:56vw;min-height:240px}.side{height:320px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div><div id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let db={teachers:[{id:'t1',name:'مدرس تجريبي',user:'teacher',pass:'1234'}],students:[],classes:[],lectures:[],chats:{}},me=null,tab='classes',lm='scode',room=null,files={},media=null;
+try{const r=localStorage.getItem('edu');if(r)db=JSON.parse(r)}catch(e){}
+try{const m=sessionStorage.getItem('edu_me');if(m)me=JSON.parse(m)}catch(e){}
+const save=()=>{try{localStorage.setItem('edu',JSON.stringify(db));sessionStorage.setItem('edu_me',JSON.stringify(me))}catch(e){}};
+const uid=()=>Math.random().toString(36).slice(2,9),gen=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)};
+const pre=(location.hash.match(/^#join-([A-Z0-9]+)$/)||[])[1];if(pre&&!me)lm='scode';
+const link=c=>location.href.split('#')[0]+'#join-'+c;
+const val=id=>($('#'+id)?.value||'').trim();
+
+function render(){const a=$('#app');if(room)return roomView(a);a.innerHTML=me?(me.role==='t'?teacherView():studentView()):loginView();}
+
+function loginView(){
+const tabs=[['sacc','طالب: حسابي'],['scode','طالب: رمز الصف'],['tlog','مدرس: دخول'],['treg','مدرس: حساب جديد']];
+let f='';
+if(lm==='sacc')f=`<label for="u">اسم المستخدم</label><input id="u" autocomplete="username"><label for="p">كلمة السر</label><input id="p" type="password" autocomplete="current-password">`;
+if(lm==='scode')f=`<label for="n">الاسم الثلاثي</label><input id="n" autocomplete="name"><label for="g">الصف</label><input id="g" placeholder="مثال: الخامس الإعدادي"><label for="sec">الشعبة</label><input id="sec" placeholder="مثال: أ"><label for="ph">رقم الهاتف</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><label for="c">رمز الصف</label><input id="c" value="${esc(pre||'')}" style="text-transform:uppercase" placeholder="مثال: K7M2QX">`;
+if(lm==='tlog')f=`<label for="u">اسم المستخدم</label><input id="u"><label for="p">كلمة السر</label><input id="p" type="password"><p class="mute" style="font-size:.85rem">حساب التجربة: teacher / 1234</p>`;
+if(lm==='treg')f=`<label for="n">الاسم</label><input id="n"><label for="u">اسم المستخدم</label><input id="u"><label for="p">كلمة السر</label><input id="p" type="password">`;
+const go={sacc:'دخول',scode:'ادخل الصف',tlog:'دخول',treg:'إنشاء الحساب'}[lm];
+return `<div class="login"><section class="board"><div class="tray"></div><h1>الصف يبدأ من هنا</h1><p>بث مباشر مع المدرس، محاضرات محفوظة، وحساب لكل طالب.</p></section>
+<section class="formside"><div class="box"><div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab ${lm===t[0]?'on':''}" role="tab" data-lm="${t[0]}">${t[1]}</button>`).join('')}</div>
+${f}<div style="margin-top:1.2rem"><button class="btn" style="width:100%" id="go">${go}</button></div></div></section></div>`}
+
+function doLogin(){
+if(lm==='sacc'){const s=db.students.find(x=>x.user===val('u')&&x.pass===$('#p').value);if(!s)return toast('اسم المستخدم أو كلمة السر غير صحيحة');me={role:'s',id:s.id,name:s.name}}
+else if(lm==='scode'){const cd=val('c').toUpperCase();if(val('n').split(/\s+/).length<3)return toast('اكتب الاسم الثلاثي كاملاً');if(!val('g')||!val('sec'))return toast('اكتب الصف والشعبة');if(val('ph').replace(/\D/g,'').length<8)return toast('اكتب رقم هاتف صحيح');if(!cd)return toast('اكتب رمز الصف');me={role:'s',id:uid(),name:val('n'),grade:val('g'),sec:val('sec'),phone:val('ph'),code:cd};room=cd}
+else if(lm==='tlog'){const t=db.teachers.find(x=>x.user===val('u')&&x.pass===$('#p').value);if(!t)return toast('اسم المستخدم أو كلمة السر غير صحيحة');me={role:'t',id:t.id,name:t.name}}
+else{if(!val('n')||!val('u')||!$('#p').value)return toast('عبّي كل الحقول');if(db.teachers.some(x=>x.user===val('u')))return toast('اسم المستخدم مستخدم مسبقاً');const t={id:uid(),name:val('n'),user:val('u'),pass:$('#p').value};db.teachers.push(t);me={role:'t',id:t.id,name:t.name}}
+tab='classes';save();render()}
+
+function topbar(){return `<header class="top"><b>منصة الصف</b><span>${esc(me.name)} <button class="btn alt sm" data-a="out">خروج</button></span></header>`}
+
+function teacherView(){
+const cl=db.classes.filter(c=>c.t===me.id),ids=cl.map(c=>c.id),st=db.students.filter(s=>ids.includes(s.classId)),lc=db.lectures.filter(l=>ids.includes(l.classId));
+const opts=cl.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+let body='';
+if(tab==='classes')body=`<div class="add"><div><label for="cn">اسم الصف</label><input id="cn" placeholder="مثال: الرياضيات، الصف الخامس"></div><button class="btn" data-a="addc">إضافة صف</button></div>`+
+(cl.length?cl.map(c=>`<div class="card"><div class="row"><div><b>${esc(c.name)}</b> ${c.live?'<span class="live">مباشر</span>':''}<div class="mute">${st.filter(s=>s.classId===c.id).length} طالب · الرمز <span class="code">${c.code}</span></div></div>
+<div class="row"><button class="btn amber" data-a="live" data-id="${c.id}">${c.live?'ارجع للبث':'ابدأ البث'}</button><button class="btn alt" data-a="copy" data-id="${c.id}">انسخ رابط الدعوة</button><button class="btn alt" data-a="wa" data-id="${c.id}">إرسال بالواتساب</button><button class="btn danger sm" data-a="delc" data-id="${c.id}">حذف</button></div></div></div>`).join(''):'<div class="empty">ما عندك صفوف بعد. أضف أول صف حتى يطلع له رمز ورابط دعوة.</div>');
+if(tab==='students')body=cl.length?`<div class="add"><div><label for="sn">اسم الطالب</label><input id="sn"></div><div><label for="su">اسم المستخدم</label><input id="su"></div><div><label for="sp">كلمة السر</label><input id="sp"></div><div><label for="sc">الصف</label><select id="sc">${opts}</select></div><button class="btn" data-a="adds">إنشاء حساب</button></div>`+
+(st.length?st.map(s=>`<div class="card row"><div><b>${esc(s.name)}</b><div class="mute">${s.user?'المستخدم: '+esc(s.user)+' · كلمة السر: '+esc(s.pass):'دخل برمز الصف'} · ${esc(cl.find(c=>c.id===s.classId)?.name)}</div></div><button class="btn danger sm" data-a="dels" data-id="${s.id}">حذف</button></div>`).join(''):'<div class="empty">ما أضفت طلاب بعد.</div>'):'<div class="empty">أضف صفاً أولاً من تبويب الصفوف.</div>';
+if(tab==='students'){const jn=(db.joined||[]).filter(j=>ids.includes(j.classId));body+=`<h3>الطلاب الذين دخلوا عبر الرابط</h3>`+(jn.length?jn.map(j=>`<div class="card row"><div><b>${esc(j.name)}</b><div class="mute">${esc(j.grade)} · شعبة ${esc(j.sec)} · ${esc(j.phone)} · ${esc(cl.find(c=>c.id===j.classId)?.name)}</div></div><span class="mute">${esc(j.last)}</span></div>`).join(''):'<div class="empty">لم يدخل أحد بعد.</div>')}
+if(tab==='lectures')body=cl.length?`<div class="add"><div><label for="lt">عنوان المحاضرة</label><input id="lt"></div><div><label for="lcs">الصف</label><select id="lcs">${opts}</select></div><div><label for="lf">الملف</label><input id="lf" type="file"></div><button class="btn" data-a="addl">رفع المحاضرة</button></div>`+
+(lc.length?lc.map(l=>`<div class="card row"><div><b>${esc(l.title)}</b><div class="mute">${esc(cl.find(c=>c.id===l.classId)?.name)} · ${esc(l.file)}</div></div><div class="row">${files[l.id]?`<a class="btn alt sm" href="${files[l.id]}" download="${esc(l.file)}">تنزيل</a>`:''}<button class="btn danger sm" data-a="dell" data-id="${l.id}">حذف</button></div></div>`).join(''):'<div class="empty">ما رفعت محاضرات بعد.</div>'):'<div class="empty">أضف صفاً أولاً من تبويب الصفوف.</div>';
+return topbar()+`<main><div class="tabs">${[['classes','الصفوف'],['students','الطلاب'],['lectures','المحاضرات']].map(t=>`<button class="tab ${tab===t[0]?'on':''}" data-tab="${t[0]}">${t[1]}</button>`).join('')}</div>${body}</main>`}
+
+function studentView(){
+if(me.code)return topbar()+`<main><div class="card row"><b>الصف ${esc(me.code)}</b><button class="btn amber" data-a="rejoin">ادخل غرفة البث</button></div></main>`;
+const s=db.students.find(x=>x.id===me.id);const c=s&&db.classes.find(x=>x.id===s.classId);
+if(!c)return topbar()+'<main><div class="empty">هذا الحساب غير مرتبط بصف. اطلب من المدرس يضيفك.</div></main>';
+const lc=db.lectures.filter(l=>l.classId===c.id);
+return topbar()+`<main><div class="card"><div class="row"><div><b style="font-size:1.2rem">${esc(c.name)}</b> ${c.live?'<span class="live">مباشر</span>':''}<div class="mute">${c.live?'المدرس يبث الآن':'المدرس لم يبدأ البث بعد'}</div></div><button class="btn amber" data-a="live" data-id="${c.id}">ادخل غرفة البث</button></div></div>
+<h3>المحاضرات</h3>${lc.length?lc.map(l=>`<div class="card row"><div><b>${esc(l.title)}</b><div class="mute">${esc(l.file)}</div></div>${files[l.id]?`<a class="btn alt sm" href="${files[l.id]}" download="${esc(l.file)}">تنزيل</a>`:''}</div>`).join(''):'<div class="empty">ما فيه محاضرات بعد.</div>'}</main>`}
+
+let peer=null,conns=[],calls=[],curV=null,rec=null,chunks=[],drawT=0,rcode='';
+function roomView(a){
+const c=db.classes.find(x=>x.id===room),t=me.role==='t';rcode=c?c.code:room;
+a.innerHTML=`<header class="top"><b>${esc(c?c.name:'غرفة الصف '+rcode)} <span class="live">مباشر</span> <span id="cnt" class="mute" style="color:inherit;opacity:.8"></span></b><button class="btn alt sm" data-a="leave">${t?'إنهاء البث وحفظ التسجيل':'خروج من الغرفة'}</button></header>
+<div class="room"><div class="stage" id="stg"><video id="v" autoplay playsinline ${t?'muted':''}></video><div class="msg" id="sm">${t?'جاري فتح الكاميرا...':'جاري الاتصال بالمدرس...'}</div>
+${t?`<div class="ctrl"><button class="btn sm" data-a="mic">المايك</button><button class="btn sm" data-a="cam">الكاميرا</button><button class="btn amber sm" data-a="scr">مشاركة الشاشة</button></div>`:''}</div>
+<aside class="side"><div class="chat" id="chat"><span class="mute">الدردشة فارغة.</span></div><div class="send"><input id="ci" placeholder="اكتب رسالة" aria-label="رسالة"><button class="btn" data-a="send">إرسال</button></div></aside></div>`;
+$('#stg').onclick=()=>$('#v').play().catch(()=>{});
+if(t)openCam();else joinLive()}
+function addMsg(m){const x=$('#chat');if(!x)return;if(!x.dataset.f){x.innerHTML='';x.dataset.f=1}const d=document.createElement('div'),b=document.createElement('b');b.textContent=m.n+': ';d.append(b,document.createTextNode(m.t));x.append(d);x.scrollTop=x.scrollHeight}
+const cnt=()=>{const e=$('#cnt');if(e)e.textContent=conns.filter(k=>k.open).length+' طالب متصل'};
+async function openCam(){try{media=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720},audio:true});curV=media.getVideoTracks()[0];$('#v').srcObject=media;$('#sm')?.remove();startPeer();startRec()}catch(e){const m=$('#sm');if(m)m.textContent='تعذر فتح الكاميرا. اسمح للمتصفح باستخدامها ثم ادخل من جديد.'}}
+function logJoin(h){const f=x=>String(x||'').slice(0,80),n={name:f(h.name),grade:f(h.grade),sec:f(h.sec),phone:f(h.phone)};db.joined=db.joined||[];const d=new Date().toLocaleString('ar-IQ'),k=db.joined.find(j=>j.classId===room&&j.phone===n.phone&&j.name===n.name);if(k)k.last=d;else db.joined.push({classId:room,...n,last:d});save();toast('دخل الطالب: '+n.name)}
+function startPeer(){peer=new Peer('sfedu-'+rcode);
+peer.on('error',e=>toast(e.type==='unavailable-id'?'هذي الغرفة مفتوحة في نافذة ثانية. سكّرها وحاول مرة ثانية':'خطأ بالاتصال: '+e.type));
+peer.on('connection',cn=>{conns.push(cn);cn.on('open',()=>{calls.push(peer.call(cn.peer,new MediaStream([curV,...media.getAudioTracks()])));cnt()});
+cn.on('data',d=>{if(d.hello)logJoin(d.hello);if(d.chat){addMsg(d.chat);conns.forEach(k=>k!==cn&&k.open&&k.send(d))}});cn.on('close',()=>{conns=conns.filter(k=>k!==cn);cnt()})})}
+function joinLive(){const v=$('#v');peer=new Peer();peer.on('open',tryJoin);
+peer.on('call',cl=>{cl.answer();cl.on('stream',s=>{v.srcObject=s;$('#sm')?.remove();v.play().catch(()=>{})})});
+peer.on('error',e=>{if(e.type==='peer-unavailable'){const m=$('#sm');if(m)m.textContent='المدرس لم يبدأ البث بعد. سيتصل تلقائياً عند بدء البث.';setTimeout(tryJoin,4000)}})}
+function tryJoin(){if(!peer||peer.destroyed||!room)return;const cn=peer.connect('sfedu-'+rcode,{reliable:true});conns=[cn];cn.on('open',()=>cn.send({hello:{name:me.name,grade:me.grade,sec:me.sec,phone:me.phone}}));cn.on('data',d=>d.chat&&addMsg(d.chat));cn.on('close',()=>{const v=$('#v');if(v){v.srcObject=null}const m=$('#stg');if(m&&!$('#sm')){const e=document.createElement('div');e.className='msg';e.id='sm';e.textContent='انتهى البث.';m.prepend(e)}})}
+function startRec(){const cv=document.createElement('canvas');cv.width=1280;cv.height=720;const x=cv.getContext('2d');
+drawT=setInterval(()=>{const v=$('#v');if(!v)return;x.fillStyle='#000';x.fillRect(0,0,1280,720);const w=v.videoWidth||1280,h=v.videoHeight||720,k=Math.min(1280/w,720/h);x.drawImage(v,(1280-w*k)/2,(720-h*k)/2,w*k,h*k)},40);
+const o=cv.captureStream(25);media.getAudioTracks().forEach(t=>o.addTrack(t));chunks=[];
+const mt=['video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+rec=new MediaRecorder(o,mt?{mimeType:mt}:{});rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);rec.start(2000)}
+function swap(t){curV=t;calls.forEach(c=>c.peerConnection?.getSenders().find(s=>s.track?.kind==='video')?.replaceTrack(t))}
+function saveRec(c){if(!chunks.length||!c)return;const b=new Blob(chunks,{type:'video/webm'}),id=uid(),d=new Date().toLocaleDateString('en-GB').replace(/\//g,'-');
+db.lectures.push({id,title:'بث '+c.name+' ('+d+')',classId:c.id,file:'lecture-'+d+'.webm'});files[id]=URL.createObjectURL(b);idbPut(id,b);save();toast('تم حفظ التسجيل ونشره ضمن المحاضرات')}
+function stopMedia(){media?.getTracks().forEach(t=>t.stop());media=null}
+function fin(){clearInterval(drawT);try{peer?.destroy()}catch(e){}peer=null;conns=[];calls=[];stopMedia();const c=db.classes.find(x=>x.id===room);if(me.role==='t'&&c){c.live=false;save()}room=null;rec=null;render()}
+function leave(){const c=db.classes.find(x=>x.id===room);if(me.role==='t'&&rec&&rec.state!=='inactive'){rec.onstop=()=>{saveRec(c);fin()};rec.stop()}else fin()}
+const idb=()=>new Promise((r,j)=>{const q=indexedDB.open('edu',1);q.onupgradeneeded=()=>q.result.createObjectStore('f');q.onsuccess=()=>r(q.result);q.onerror=j});
+async function idbPut(k,b){try{const d=await idb();d.transaction('f','readwrite').objectStore('f').put(b,k)}catch(e){}}
+async function idbLoad(){try{const d=await idb();for(const l of db.lectures)await new Promise(r=>{const g=d.transaction('f').objectStore('f').get(l.id);g.onsuccess=()=>{if(g.result)files[l.id]=URL.createObjectURL(g.result);r()};g.onerror=r});if(!room)render()}catch(e){}}
+
+document.addEventListener('click',async e=>{
+const b=e.target.closest('button,[data-lm]');if(!b)return;const d=b.dataset,a=d.a;
+if(d.lm){lm=d.lm;return render()}if(d.tab){tab=d.tab;return render()}
+if(b.id==='go')return doLogin();
+if(a==='out'){me=null;try{sessionStorage.removeItem('edu_me')}catch(e){}return render()}
+if(a==='addc'){const n=val('cn');if(!n)return toast('اكتب اسم الصف');db.classes.push({id:uid(),t:me.id,name:n,code:gen(),live:false});save();toast('تمت إضافة الصف');return render()}
+if(a==='delc'){db.classes=db.classes.filter(c=>c.id!==d.id);db.students=db.students.filter(s=>s.classId!==d.id);db.lectures=db.lectures.filter(l=>l.classId!==d.id);save();return render()}
+if(a==='copy'){const c=db.classes.find(x=>x.id===d.id);try{await navigator.clipboard.writeText(link(c.code));toast('تم نسخ الرابط')}catch(e){toast('الرمز: '+c.code)}return}
+if(a==='wa'){const c=db.classes.find(x=>x.id===d.id),p=(prompt('رقم الطالب بالصيغة الدولية مثل 9647701234567 (اتركه فارغاً لاختيار الشخص من واتساب)')||'').replace(/\D/g,'');window.open('https://wa.me/'+p+'?text='+encodeURIComponent('أهلاً، هذي دعوتك لصف '+c.name+':\n'+link(c.code)+'\nرمز الصف: '+c.code),'_blank');return}
+if(a==='rejoin'){room=me.code;return render()}
+if(a==='adds'){if(!val('sn')||!val('su')||!val('sp'))return toast('عبّي كل الحقول');if(db.students.some(s=>s.user===val('su')))return toast('اسم المستخدم مستخدم مسبقاً');db.students.push({id:uid(),name:val('sn'),user:val('su'),pass:val('sp'),classId:val('sc')});save();toast('تم إنشاء حساب الطالب');return render()}
+if(a==='dels'){db.students=db.students.filter(s=>s.id!==d.id);save();return render()}
+if(a==='addl'){const f=$('#lf').files[0];if(!val('lt')||!f)return toast('اكتب العنوان واختر ملفاً');const id=uid();files[id]=URL.createObjectURL(f);idbPut(id,f);db.lectures.push({id,title:val('lt'),classId:val('lcs'),file:f.name});save();toast('تم رفع المحاضرة');return render()}
+if(a==='dell'){db.lectures=db.lectures.filter(l=>l.id!==d.id);save();return render()}
+if(a==='live'){const c=db.classes.find(x=>x.id===d.id);if(me.role==='t'){c.live=true;save()}room=d.id;return render()}
+if(a==='leave')return leave();
+if(a==='mic'||a==='cam'){const k=a==='mic'?media?.getAudioTracks():media?.getVideoTracks();k?.forEach(t=>t.enabled=!t.enabled);toast(k?.[0]?.enabled?'تشغيل':'إيقاف');return}
+if(a==='scr'){try{const sc=await navigator.mediaDevices.getDisplayMedia({video:true}),vt=sc.getVideoTracks()[0],v=$('#v');v.srcObject=new MediaStream([vt,...media.getAudioTracks()]);swap(vt);vt.onended=()=>{v.srcObject=media;swap(media.getVideoTracks()[0])}}catch(e){toast('تعذرت مشاركة الشاشة')}return}
+if(a==='send'){const i=$('#ci'),t=i.value.trim();if(!t)return;const m={n:me.name,t};i.value='';addMsg(m);conns.forEach(k=>k.open&&k.send({chat:m}));return}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='ci')$('[data-a=send]').click();else if($('#go')&&e.target.tagName==='INPUT')doLogin()}});
+render();idbLoad();
+</script>
+</body>
+</html>
